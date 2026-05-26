@@ -39,3 +39,17 @@ This was the lowest-risk refactoring available: `isLegal()` already existed with
 ### Result
 
 `chooseBotCard()` went from 37 lines to 20. There is now one authoritative place for legality rules.
+
+## Step 3: Extract Card Effect Handling into applyEffect()
+
+### What changed
+
+The 30-line if/else chain inside `playGame()` that handled skip, reverse, draw two, and wild draw four was extracted into a new `applyEffect(String card)` method. The main loop now calls `applyEffect(card)` in its place.
+
+### Why this step
+
+The main game loop was doing too many things at once — tracking turns, validating cards, handling console output, and applying card effects all in the same block. Extracting `applyEffect()` gives each card's behavior a clear, findable home and makes the loop easier to read. It also makes it straightforward to add a new card effect later without touching the turn logic.
+
+### Result
+
+The main loop is significantly shorter and easier to follow. Card effects are now in one dedicated method.

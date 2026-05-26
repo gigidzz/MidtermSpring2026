@@ -235,37 +235,7 @@ public class Main {
                     return;
                 }
 
-                if (rank(card).equals("SKIP")) {
-                    next();
-                    next();
-                } else if (rank(card).equals("REVERSE")) {
-                    direction = direction * -1;
-                    if (playerNames.size() == 2) {
-                        next();
-                        next();
-                    } else {
-                        next();
-                    }
-                } else if (rank(card).equals("DRAW_TWO")) {
-                    next();
-                    hands.get(currentPlayer).add(draw());
-                    hands.get(currentPlayer).add(draw());
-                    if (!quiet) {
-                        System.out.println(playerNames.get(currentPlayer) + " draws two.");
-                    }
-                    next();
-                } else if (rank(card).equals("WILD_DRAW_FOUR")) {
-                    next();
-                    for (int i = 0; i < 4; i++) {
-                        hands.get(currentPlayer).add(draw());
-                    }
-                    if (!quiet) {
-                        System.out.println(playerNames.get(currentPlayer) + " draws four.");
-                    }
-                    next();
-                } else {
-                    next();
-                }
+                applyEffect(card);
             } else {
                 next();
             }
@@ -461,6 +431,40 @@ public class Main {
             return 50;
         }
         return 0;
+    }
+
+    static void applyEffect(String card) {
+        if (rank(card).equals("SKIP")) {
+            next();
+            next();
+        } else if (rank(card).equals("REVERSE")) {
+            direction = direction * -1;
+            if (playerNames.size() == 2) {
+                next();
+                next();
+            } else {
+                next();
+            }
+        } else if (rank(card).equals("DRAW_TWO")) {
+            next();
+            hands.get(currentPlayer).add(draw());
+            hands.get(currentPlayer).add(draw());
+            if (!quiet) {
+                System.out.println(playerNames.get(currentPlayer) + " draws two.");
+            }
+            next();
+        } else if (rank(card).equals("WILD_DRAW_FOUR")) {
+            next();
+            for (int i = 0; i < 4; i++) {
+                hands.get(currentPlayer).add(draw());
+            }
+            if (!quiet) {
+                System.out.println(playerNames.get(currentPlayer) + " draws four.");
+            }
+            next();
+        } else {
+            next();
+        }
     }
 
     static void next() {
