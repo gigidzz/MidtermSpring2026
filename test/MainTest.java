@@ -15,11 +15,9 @@ public class MainTest {
         Main.currentPlayer = 0;
         Main.deck = new ArrayList<>();
         Main.discard = new ArrayList<>();
-        Main.playerNames = new ArrayList<>();
-        Main.humanPlayers = new ArrayList<>();
-        Main.hands = new ArrayList<>();
+        Main.players = new ArrayList<>();
         Main.scores = new int[10];
-        Main.quiet = true;
+        Display.quiet = true;
     }
 
     // ── color() ──────────────────────────────────────────────────────────────
@@ -181,20 +179,19 @@ public class MainTest {
 
     @Test
     void scoringAddsOpponentHandValues() {
-        Main.setupPlayers(2, false);  // 2 bots = hands at index 0 and 1
-        Main.quiet = true;
+        Main.setupPlayers(2, false);  // 2 bots = players at index 0 and 1
         Main.upCard = "R5";
         Main.calledColor = "";
 
-        Main.hands.get(0).clear();  // winner — empty hand
-        Main.hands.get(1).clear();
-        Main.hands.get(1).add("W");   // 50 points
-        Main.hands.get(1).add("R5");  // 5 points
+        Main.players.get(0).hand.clear();  // winner — empty hand
+        Main.players.get(1).hand.clear();
+        Main.players.get(1).hand.add("W");   // 50 points
+        Main.players.get(1).hand.add("R5");  // 5 points
 
         int expected = 55;
         int actual = 0;
-        for (int i = 1; i < Main.hands.size(); i++) {
-            for (String card : Main.hands.get(i)) {
+        for (int i = 1; i < Main.players.size(); i++) {
+            for (String card : Main.players.get(i).hand) {
                 actual += Main.points(card);
             }
         }

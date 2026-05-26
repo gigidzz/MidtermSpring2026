@@ -5,9 +5,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
-    static ArrayList<String> playerNames = new ArrayList<String>();
-    static ArrayList<Boolean> humanPlayers = new ArrayList<Boolean>();
-    static ArrayList<ArrayList<String>> hands = new ArrayList<ArrayList<String>>();
+    static ArrayList<Player> players = new ArrayList<Player>();
     static ArrayList<String> deck = new ArrayList<String>();
     static ArrayList<String> discard = new ArrayList<String>();
     static int[] scores = new int[10];
@@ -49,7 +47,7 @@ public class Main {
         random = new Random(seed);
         setupPlayers(bots, human);
 
-        if (playerNames.size() < 2 || playerNames.size() > 4) {
+        if (players.size() < 2 || players.size() > 4) {
             Display.invalidPlayerCount();
             return;
         }
@@ -59,22 +57,18 @@ public class Main {
             playGame();
         }
 
-        Display.finalScores(playerNames, scores);
+        ArrayList<String> names = new ArrayList<String>();
+        for (Player p : players) names.add(p.name);
+        Display.finalScores(names, scores);
     }
 
     static void setupPlayers(int bots, boolean human) {
-        playerNames.clear();
-        humanPlayers.clear();
-        hands.clear();
+        players.clear();
         if (human) {
-            playerNames.add("You");
-            humanPlayers.add(Boolean.TRUE);
-            hands.add(new ArrayList<String>());
+            players.add(new Player("You", true));
         }
         for (int i = 1; i <= bots; i++) {
-            playerNames.add("Bot" + i);
-            humanPlayers.add(Boolean.FALSE);
-            hands.add(new ArrayList<String>());
+            players.add(new Player("Bot" + i, false));
         }
     }
 
@@ -100,12 +94,12 @@ public class Main {
         }
         Collections.shuffle(deck, random);
         discard.clear();
-        for (int i = 0; i < hands.size(); i++) {
-            hands.get(i).clear();
+        for (Player p : players) {
+            p.hand.clear();
         }
-        for (int i = 0; i < playerNames.size(); i++) {
+        for (Player p : players) {
             for (int j = 0; j < 7; j++) {
-                hands.get(i).add(draw());
+                p.hand.add(draw());
             }
         }
         upCard = draw();
@@ -115,19 +109,20 @@ public class Main {
         }
         calledColor = "";
         direction = 1;
-        currentPlayer = random.nextInt(playerNames.size());
+        currentPlayer = random.nextInt(players.size());
 
         int guard = 0;
         while (guard < 3000) {
             guard++;
-            String name = playerNames.get(currentPlayer);
-            ArrayList<String> hand = hands.get(currentPlayer);
+            Player player = players.get(currentPlayer);
+            String name = player.name;
+            ArrayList<String> hand = player.hand;
 
             Display.upCardStatus(upCard, calledColor);
             Display.playerHand(name, hand);
 
             int chosen = -1;
-            if (humanPlayers.get(currentPlayer).booleanValue()) {
+            if (player.human) {
                 chosen = askHuman(hand);
             } else {
                 chosen = chooseBotCard(hand);
@@ -138,7 +133,7 @@ public class Main {
                 hand.add(drawn);
                 Display.playerDraws(name, drawn);
                 if (isLegal(drawn, upCard, calledColor)) {
-                    if (!humanPlayers.get(currentPlayer).booleanValue()) {
+                    if (!player.human) {
                         chosen = hand.size() - 1;
                     } else {
                         Display.promptPlayDrawnCard(drawn);
@@ -175,7 +170,7 @@ public class Main {
                 Display.playerPlays(name, card);
 
                 if (card.equals("W") || card.equals("W4")) {
-                    if (humanPlayers.get(currentPlayer).booleanValue()) {
+                    if (player.human) {
                         calledColor = askColor();
                     } else {
                         calledColor = chooseBotColor(hand);
@@ -188,14 +183,7 @@ public class Main {
                 }
 
                 if (hand.size() == 0) {
-                    int points = 0;
-                    for (int i = 0; i < hands.size(); i++) {
-                        if (i != currentPlayer) {
-                            for (int j = 0; j < hands.get(i).size(); j++) {
-                                points += points(hands.get(i).get(j));
-                            }
-                        }
-                    }
+                    int points = calculateScore();
                     scores[currentPlayer] += points;
                     Display.playerWins(name, points);
                     return;
@@ -207,6 +195,18 @@ public class Main {
             }
         }
         Display.gameStopped();
+    }
+
+    static int calculateScore() {
+        int points = 0;
+        for (int i = 0; i < players.size(); i++) {
+            if (i != currentPlayer) {
+                for (String card : players.get(i).hand) {
+                    points += points(card);
+                }
+            }
+        }
+        return points;
     }
 
     static String draw() {
@@ -349,7 +349,7 @@ public class Main {
             next();
         } else if (rank(card).equals("REVERSE")) {
             direction = direction * -1;
-            if (playerNames.size() == 2) {
+            if (players.size() == 2) {
                 next();
                 next();
             } else {
@@ -357,16 +357,16 @@ public class Main {
             }
         } else if (rank(card).equals("DRAW_TWO")) {
             next();
-            hands.get(currentPlayer).add(draw());
-            hands.get(currentPlayer).add(draw());
-            Display.playerDrawsTwo(playerNames.get(currentPlayer));
+            players.get(currentPlayer).hand.add(draw());
+            players.get(currentPlayer).hand.add(draw());
+            Display.playerDrawsTwo(players.get(currentPlayer).name);
             next();
         } else if (rank(card).equals("WILD_DRAW_FOUR")) {
             next();
             for (int i = 0; i < 4; i++) {
-                hands.get(currentPlayer).add(draw());
+                players.get(currentPlayer).hand.add(draw());
             }
-            Display.playerDrawsFour(playerNames.get(currentPlayer));
+            Display.playerDrawsFour(players.get(currentPlayer).name);
             next();
         } else {
             next();
@@ -375,8 +375,8 @@ public class Main {
 
     static void next() {
         currentPlayer += direction;
-        if (currentPlayer >= playerNames.size()) currentPlayer = 0;
-        if (currentPlayer < 0) currentPlayer = playerNames.size() - 1;
+        if (currentPlayer >= players.size()) currentPlayer = 0;
+        if (currentPlayer < 0) currentPlayer = players.size() - 1;
     }
 
     static String join(ArrayList<String> cards) {

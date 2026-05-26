@@ -71,3 +71,21 @@ All output messages are identical — the same strings, the same quiet/verbose b
 ### Result
 
 `Main.java` contains no `System.out` calls except inside `Display`. Swapping out the CLI view now means only touching `Display.java`.
+
+## Step 5: Extract Player Class and Scoring Method
+
+### What changed
+
+A new `Player` class was created with three fields: `name`, `human`, and `hand`. The three parallel static ArrayLists — `playerNames`, `humanPlayers`, and `hands` — were removed from `Main` and replaced with a single `ArrayList<Player> players`. All access to player data now goes through the `Player` object.
+
+Scoring was also extracted from the win-detection block into its own `calculateScore()` method, which sums opponent hand values. The win block now reads clearly: calculate points, add to score, display result, return.
+
+### Why this step
+
+The three parallel lists were the most visible form of weak player boundaries. Any operation on a player required touching three separate lists at the same index — easy to get out of sync, hard to read. A `Player` object keeps all player data in one place.
+
+Extracting `calculateScore()` addresses the scoring-mixed-with-game-completion smell. The win condition and the score calculation are now separate concerns.
+
+### Result
+
+Player-related code is easier to follow. Adding a new field to a player (e.g. a score per player, or a strategy) now means one change in one class, not three parallel lists.
