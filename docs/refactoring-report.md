@@ -25,3 +25,17 @@ Writing tests before any refactoring was the first priority. Without them, there
 
 - The legal-play check is written out three times: once in `isLegal()`, once in `chooseBotCard()`, and once inline in the main turn loop. `isLegal()` exists but is not used everywhere.
 - The entire game — state, rules, console I/O, bot logic, scoring — lives in one 535-line class with global static fields.
+
+## Step 2: Eliminate Duplicated Legal-Play Logic in chooseBotCard()
+
+### What changed
+
+`chooseBotCard()` had the 5-line legality check copy-pasted three times across its four loops. Each copy was identical to the existing `isLegal()` method but was not calling it. Each block was replaced with a single call to `isLegal(card, upCard, calledColor)`.
+
+### Why this step first
+
+This was the lowest-risk refactoring available: `isLegal()` already existed with the correct logic, the tests already covered bot card selection, and the change was purely mechanical substitution. No behavior could change because the logic is identical — only the duplication is removed.
+
+### Result
+
+`chooseBotCard()` went from 37 lines to 20. There is now one authoritative place for legality rules.
