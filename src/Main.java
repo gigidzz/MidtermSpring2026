@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -103,7 +102,7 @@ public class Main {
             }
         }
         upCard = draw();
-        while (upCard.startsWith("W")) {
+        while (Card.isWild(upCard)) {
             discard.add(upCard);
             upCard = draw();
         }
@@ -132,7 +131,7 @@ public class Main {
                 String drawn = draw();
                 hand.add(drawn);
                 Display.playerDraws(name, drawn);
-                if (isLegal(drawn, upCard, calledColor)) {
+                if (Card.isLegal(drawn, upCard, calledColor)) {
                     if (!player.human) {
                         chosen = hand.size() - 1;
                     } else {
@@ -154,9 +153,8 @@ public class Main {
                 }
 
                 String card = hand.get(chosen);
-                boolean ok = isLegal(card, upCard, calledColor);
 
-                if (!ok) {
+                if (!Card.isLegal(card, upCard, calledColor)) {
                     Display.illegalCardPenalty(name, card);
                     hand.add(draw());
                     next();
@@ -169,7 +167,7 @@ public class Main {
                 calledColor = "";
                 Display.playerPlays(name, card);
 
-                if (card.equals("W") || card.equals("W4")) {
+                if (Card.isWild(card)) {
                     if (player.human) {
                         calledColor = askColor();
                     } else {
@@ -202,7 +200,7 @@ public class Main {
         for (int i = 0; i < players.size(); i++) {
             if (i != currentPlayer) {
                 for (String card : players.get(i).hand) {
-                    points += points(card);
+                    points += Card.points(card);
                 }
             }
         }
@@ -215,35 +213,25 @@ public class Main {
             discard.clear();
             Collections.shuffle(deck, random);
         }
-        if (deck.size() == 0) {
-            return "W";
-        }
+        if (deck.size() == 0) return "W";
         return deck.remove(0);
     }
 
     static int chooseBotCard(ArrayList<String> hand) {
         for (int i = 0; i < hand.size(); i++) {
             String card = hand.get(i);
-            if (rank(card).equals("DRAW_TWO") && isLegal(card, upCard, calledColor)) {
-                return i;
-            }
+            if (Card.rank(card).equals("DRAW_TWO") && Card.isLegal(card, upCard, calledColor)) return i;
         }
         for (int i = 0; i < hand.size(); i++) {
             String card = hand.get(i);
-            if (rank(card).equals("SKIP") && isLegal(card, upCard, calledColor)) {
-                return i;
-            }
+            if (Card.rank(card).equals("SKIP") && Card.isLegal(card, upCard, calledColor)) return i;
         }
         for (int i = 0; i < hand.size(); i++) {
             String card = hand.get(i);
-            if (rank(card).equals("NUMBER") && isLegal(card, upCard, calledColor)) {
-                return i;
-            }
+            if (Card.rank(card).equals("NUMBER") && Card.isLegal(card, upCard, calledColor)) return i;
         }
         for (int i = 0; i < hand.size(); i++) {
-            if (hand.get(i).startsWith("W")) {
-                return i;
-            }
+            if (Card.isWild(hand.get(i))) return i;
         }
         return -1;
     }
@@ -252,21 +240,15 @@ public class Main {
         while (true) {
             Display.promptChooseCard();
             String input = scanner.nextLine().trim().toUpperCase();
-            if (input.equals("DRAW")) {
-                return -1;
-            }
+            if (input.equals("DRAW")) return -1;
             try {
                 int index = Integer.parseInt(input);
-                if (index >= 0 && index < hand.size()) {
-                    return index;
-                }
+                if (index >= 0 && index < hand.size()) return index;
             } catch (Exception ignored) {
             }
             for (int i = 0; i < hand.size(); i++) {
                 if (hand.get(i).equals(input)) {
-                    if (isLegal(hand.get(i), upCard, calledColor)) {
-                        return i;
-                    }
+                    if (Card.isLegal(hand.get(i), upCard, calledColor)) return i;
                     Display.cardNotLegal();
                 }
             }
@@ -287,12 +269,9 @@ public class Main {
     }
 
     static String chooseBotColor(ArrayList<String> hand) {
-        int r = 0;
-        int y = 0;
-        int g = 0;
-        int b = 0;
-        for (int i = 0; i < hand.size(); i++) {
-            String c = color(hand.get(i));
+        int r = 0, y = 0, g = 0, b = 0;
+        for (String card : hand) {
+            String c = Card.color(card);
             if (c.equals("R")) r++;
             else if (c.equals("Y")) y++;
             else if (c.equals("G")) g++;
@@ -304,50 +283,11 @@ public class Main {
         else return "B";
     }
 
-    static boolean isLegal(String card, String up, String call) {
-        if (card.startsWith("W")) return true;
-        if (color(card).equals(color(up))) return true;
-        if (!call.equals("") && color(card).equals(call)) return true;
-        if (rank(card).equals(rank(up)) && !rank(card).equals("NUMBER")) return true;
-        if (rank(card).equals("NUMBER") && rank(up).equals("NUMBER") && number(card) == number(up)) return true;
-        return false;
-    }
-
-    static String color(String card) {
-        if (card.startsWith("R")) return "R";
-        if (card.startsWith("Y")) return "Y";
-        if (card.startsWith("G")) return "G";
-        if (card.startsWith("B")) return "B";
-        return "";
-    }
-
-    static String rank(String card) {
-        if (card.equals("W")) return "WILD";
-        if (card.equals("W4")) return "WILD_DRAW_FOUR";
-        if (card.endsWith("S")) return "SKIP";
-        if (card.endsWith("R")) return "REVERSE";
-        if (card.endsWith("+2")) return "DRAW_TWO";
-        return "NUMBER";
-    }
-
-    static int number(String card) {
-        if (rank(card).equals("NUMBER")) return Integer.parseInt(card.substring(1));
-        return -1;
-    }
-
-    static int points(String card) {
-        String r = rank(card);
-        if (r.equals("NUMBER")) return number(card);
-        if (r.equals("SKIP") || r.equals("REVERSE") || r.equals("DRAW_TWO")) return 20;
-        if (r.equals("WILD") || r.equals("WILD_DRAW_FOUR")) return 50;
-        return 0;
-    }
-
     static void applyEffect(String card) {
-        if (rank(card).equals("SKIP")) {
+        if (Card.rank(card).equals("SKIP")) {
             next();
             next();
-        } else if (rank(card).equals("REVERSE")) {
+        } else if (Card.rank(card).equals("REVERSE")) {
             direction = direction * -1;
             if (players.size() == 2) {
                 next();
@@ -355,13 +295,13 @@ public class Main {
             } else {
                 next();
             }
-        } else if (rank(card).equals("DRAW_TWO")) {
+        } else if (Card.rank(card).equals("DRAW_TWO")) {
             next();
             players.get(currentPlayer).hand.add(draw());
             players.get(currentPlayer).hand.add(draw());
             Display.playerDrawsTwo(players.get(currentPlayer).name);
             next();
-        } else if (rank(card).equals("WILD_DRAW_FOUR")) {
+        } else if (Card.rank(card).equals("WILD_DRAW_FOUR")) {
             next();
             for (int i = 0; i < 4; i++) {
                 players.get(currentPlayer).hand.add(draw());
@@ -390,13 +330,13 @@ public class Main {
 
     static void selfTest() {
         int passed = 0;
-        if (color("R5").equals("R")) passed++; else fail("color R5");
-        if (rank("G+2").equals("DRAW_TWO")) passed++; else fail("rank +2");
-        if (points("W4") == 50) passed++; else fail("wild points");
-        if (isLegal("R2", "R9", "")) passed++; else fail("same color");
-        if (isLegal("G9", "R9", "")) passed++; else fail("same number");
-        if (isLegal("B3", "W", "B")) passed++; else fail("called color");
-        if (!isLegal("B3", "R9", "")) passed++; else fail("illegal mismatch");
+        if (Card.color("R5").equals("R")) passed++; else fail("color R5");
+        if (Card.rank("G+2").equals("DRAW_TWO")) passed++; else fail("rank +2");
+        if (Card.points("W4") == 50) passed++; else fail("wild points");
+        if (Card.isLegal("R2", "R9", "")) passed++; else fail("same color");
+        if (Card.isLegal("G9", "R9", "")) passed++; else fail("same number");
+        if (Card.isLegal("B3", "W", "B")) passed++; else fail("called color");
+        if (!Card.isLegal("B3", "R9", "")) passed++; else fail("illegal mismatch");
 
         ArrayList<String> h = new ArrayList<String>();
         h.add("B3");

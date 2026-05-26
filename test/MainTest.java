@@ -20,166 +20,166 @@ public class MainTest {
         Display.quiet = true;
     }
 
-    // ── color() ──────────────────────────────────────────────────────────────
+    // ── Card.color() ─────────────────────────────────────────────────────────
 
     @Test
     void colorOfRedCard() {
-        assertEquals("R", Main.color("R5"));
+        assertEquals("R", Card.color("R5"));
     }
 
     @Test
     void colorOfYellowCard() {
-        assertEquals("Y", Main.color("YS"));
+        assertEquals("Y", Card.color("YS"));
     }
 
     @Test
     void colorOfGreenCard() {
-        assertEquals("G", Main.color("G+2"));
+        assertEquals("G", Card.color("G+2"));
     }
 
     @Test
     void colorOfBlueCard() {
-        assertEquals("B", Main.color("BR"));
+        assertEquals("B", Card.color("BR"));
     }
 
     @Test
     void colorOfWildIsEmpty() {
-        assertEquals("", Main.color("W"));
-        assertEquals("", Main.color("W4"));
+        assertEquals("", Card.color("W"));
+        assertEquals("", Card.color("W4"));
     }
 
-    // ── rank() ───────────────────────────────────────────────────────────────
+    // ── Card.rank() ──────────────────────────────────────────────────────────
 
     @Test
     void rankOfNumberCard() {
-        assertEquals("NUMBER", Main.rank("R5"));
-        assertEquals("NUMBER", Main.rank("B0"));
+        assertEquals("NUMBER", Card.rank("R5"));
+        assertEquals("NUMBER", Card.rank("B0"));
     }
 
     @Test
     void rankOfSkip() {
-        assertEquals("SKIP", Main.rank("RS"));
-        assertEquals("SKIP", Main.rank("GS"));
+        assertEquals("SKIP", Card.rank("RS"));
+        assertEquals("SKIP", Card.rank("GS"));
     }
 
     @Test
     void rankOfReverse() {
-        assertEquals("REVERSE", Main.rank("BR"));
-        assertEquals("REVERSE", Main.rank("YR"));
+        assertEquals("REVERSE", Card.rank("BR"));
+        assertEquals("REVERSE", Card.rank("YR"));
     }
 
     @Test
     void rankOfDrawTwo() {
-        assertEquals("DRAW_TWO", Main.rank("G+2"));
-        assertEquals("DRAW_TWO", Main.rank("R+2"));
+        assertEquals("DRAW_TWO", Card.rank("G+2"));
+        assertEquals("DRAW_TWO", Card.rank("R+2"));
     }
 
     @Test
     void rankOfWild() {
-        assertEquals("WILD", Main.rank("W"));
+        assertEquals("WILD", Card.rank("W"));
     }
 
     @Test
     void rankOfWildDrawFour() {
-        assertEquals("WILD_DRAW_FOUR", Main.rank("W4"));
+        assertEquals("WILD_DRAW_FOUR", Card.rank("W4"));
     }
 
-    // ── points() ─────────────────────────────────────────────────────────────
+    // ── Card.points() ────────────────────────────────────────────────────────
 
     @Test
     void pointsForNumberCards() {
-        assertEquals(5, Main.points("R5"));
-        assertEquals(0, Main.points("G0"));
-        assertEquals(9, Main.points("B9"));
+        assertEquals(5, Card.points("R5"));
+        assertEquals(0, Card.points("G0"));
+        assertEquals(9, Card.points("B9"));
     }
 
     @Test
     void pointsForActionCards() {
-        assertEquals(20, Main.points("YS"));
-        assertEquals(20, Main.points("BR"));
-        assertEquals(20, Main.points("G+2"));
+        assertEquals(20, Card.points("YS"));
+        assertEquals(20, Card.points("BR"));
+        assertEquals(20, Card.points("G+2"));
     }
 
     @Test
     void pointsForWilds() {
-        assertEquals(50, Main.points("W"));
-        assertEquals(50, Main.points("W4"));
+        assertEquals(50, Card.points("W"));
+        assertEquals(50, Card.points("W4"));
     }
 
-    // ── isLegal() — matching by color ────────────────────────────────────────
+    // ── Card.isLegal() — matching by color ───────────────────────────────────
 
     @Test
     void legalWhenSameColor() {
-        assertTrue(Main.isLegal("R2", "R9", ""));
-        assertTrue(Main.isLegal("RS", "R5", ""));
+        assertTrue(Card.isLegal("R2", "R9", ""));
+        assertTrue(Card.isLegal("RS", "R5", ""));
     }
 
     @Test
     void illegalWhenDifferentColorAndRank() {
-        assertFalse(Main.isLegal("B3", "R9", ""));
-        assertFalse(Main.isLegal("GS", "R5", ""));
+        assertFalse(Card.isLegal("B3", "R9", ""));
+        assertFalse(Card.isLegal("GS", "R5", ""));
     }
 
-    // ── isLegal() — matching by number ───────────────────────────────────────
+    // ── Card.isLegal() — matching by number ──────────────────────────────────
 
     @Test
     void legalWhenSameNumber() {
-        assertTrue(Main.isLegal("G9", "R9", ""));
-        assertTrue(Main.isLegal("B3", "Y3", ""));
+        assertTrue(Card.isLegal("G9", "R9", ""));
+        assertTrue(Card.isLegal("B3", "Y3", ""));
     }
 
     @Test
     void illegalWhenDifferentNumber() {
-        assertFalse(Main.isLegal("G8", "R9", ""));
+        assertFalse(Card.isLegal("G8", "R9", ""));
     }
 
-    // ── isLegal() — matching by action type ──────────────────────────────────
+    // ── Card.isLegal() — matching by action type ─────────────────────────────
 
     @Test
     void legalWhenSameActionType() {
-        assertTrue(Main.isLegal("RS", "GS", ""));   // skip on skip
-        assertTrue(Main.isLegal("BR", "YR", ""));   // reverse on reverse
-        assertTrue(Main.isLegal("R+2", "G+2", "")); // draw two on draw two
+        assertTrue(Card.isLegal("RS", "GS", ""));   // skip on skip
+        assertTrue(Card.isLegal("BR", "YR", ""));   // reverse on reverse
+        assertTrue(Card.isLegal("R+2", "G+2", "")); // draw two on draw two
     }
 
     @Test
     void illegalWhenDifferentActionTypes() {
-        assertFalse(Main.isLegal("RS", "GR", ""));  // skip vs reverse
+        assertFalse(Card.isLegal("RS", "GR", ""));  // skip vs reverse
     }
 
-    // ── isLegal() — wild cards ────────────────────────────────────────────────
+    // ── Card.isLegal() — wild cards ──────────────────────────────────────────
 
     @Test
     void wildIsAlwaysLegal() {
-        assertTrue(Main.isLegal("W", "R9", ""));
-        assertTrue(Main.isLegal("W", "GS", ""));
-        assertTrue(Main.isLegal("W", "W4", "B"));
+        assertTrue(Card.isLegal("W", "R9", ""));
+        assertTrue(Card.isLegal("W", "GS", ""));
+        assertTrue(Card.isLegal("W", "W4", "B"));
     }
 
     @Test
     void wildDrawFourIsAlwaysLegal() {
-        assertTrue(Main.isLegal("W4", "R9", ""));
-        assertTrue(Main.isLegal("W4", "B3", "Y"));
+        assertTrue(Card.isLegal("W4", "R9", ""));
+        assertTrue(Card.isLegal("W4", "B3", "Y"));
     }
 
-    // ── isLegal() — called color after wild ──────────────────────────────────
+    // ── Card.isLegal() — called color after wild ─────────────────────────────
 
     @Test
     void legalWhenMatchesCalledColor() {
-        assertTrue(Main.isLegal("B3", "W", "B"));
-        assertTrue(Main.isLegal("RS", "W4", "R"));
+        assertTrue(Card.isLegal("B3", "W", "B"));
+        assertTrue(Card.isLegal("RS", "W4", "R"));
     }
 
     @Test
     void illegalWhenDoesNotMatchCalledColor() {
-        assertFalse(Main.isLegal("G3", "W", "B"));
+        assertFalse(Card.isLegal("G3", "W", "B"));
     }
 
     // ── scoring ──────────────────────────────────────────────────────────────
 
     @Test
     void scoringAddsOpponentHandValues() {
-        Main.setupPlayers(2, false);  // 2 bots = players at index 0 and 1
+        Main.setupPlayers(2, false);
         Main.upCard = "R5";
         Main.calledColor = "";
 
@@ -192,7 +192,7 @@ public class MainTest {
         int actual = 0;
         for (int i = 1; i < Main.players.size(); i++) {
             for (String card : Main.players.get(i).hand) {
-                actual += Main.points(card);
+                actual += Card.points(card);
             }
         }
         assertEquals(expected, actual);
@@ -214,7 +214,7 @@ public class MainTest {
         Main.discard.add("YS");
         String drawn = Main.draw();
         assertTrue(drawn.equals("B2") || drawn.equals("YS"));
-        assertEquals(1, Main.deck.size() + Main.discard.size()); // one drawn, one left
+        assertEquals(1, Main.deck.size() + Main.discard.size());
     }
 
     @Test
@@ -270,7 +270,7 @@ public class MainTest {
         hand.add("RS");   // skip — legal
         hand.add("R+2");  // draw two — legal, should be preferred
         hand.add("W");
-        assertEquals(1, Main.chooseBotCard(hand)); // index of R+2
+        assertEquals(1, Main.chooseBotCard(hand));
     }
 
     @Test
@@ -280,7 +280,7 @@ public class MainTest {
         ArrayList<String> hand = new ArrayList<>();
         hand.add("R3");   // number — legal
         hand.add("RS");   // skip — legal, should be preferred
-        assertEquals(1, Main.chooseBotCard(hand)); // index of RS
+        assertEquals(1, Main.chooseBotCard(hand));
     }
 
     @Test
@@ -290,7 +290,7 @@ public class MainTest {
         ArrayList<String> hand = new ArrayList<>();
         hand.add("W");    // wild — always legal
         hand.add("R3");   // number — legal, should be preferred
-        assertEquals(1, Main.chooseBotCard(hand)); // index of R3
+        assertEquals(1, Main.chooseBotCard(hand));
     }
 
     @Test
@@ -331,7 +331,7 @@ public class MainTest {
         ArrayList<String> hand = new ArrayList<>();
         hand.add("R5");
         hand.add("G3");
-        int chosen = 5; // out of bounds
-        assertTrue(chosen >= hand.size()); // this is the condition Main checks before giving penalty
+        int chosen = 5;
+        assertTrue(chosen >= hand.size());
     }
 }

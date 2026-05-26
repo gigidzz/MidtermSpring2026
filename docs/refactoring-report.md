@@ -89,3 +89,21 @@ Extracting `calculateScore()` addresses the scoring-mixed-with-game-completion s
 ### Result
 
 Player-related code is easier to follow. Adding a new field to a player (e.g. a score per player, or a strategy) now means one change in one class, not three parallel lists.
+
+## Step 6: Extract Card Knowledge into Card Class
+
+### What changed
+
+A new `Card` class was created with static methods: `color()`, `rank()`, `number()`, `points()`, `isWild()`, and `isLegal()`. All six methods were removed from `Main` and now live exclusively in `Card`. Every call site in `Main` was updated to use `Card.xxx()`. The characterization tests were also updated to call `Card.xxx()` directly for card-related assertions, making it clear what is being tested.
+
+### Why this step
+
+Cards were represented as raw strings throughout the codebase, with their behavior spread across several methods in `Main`. There was no single place that owned "what a card knows about itself." The `Card` class gives card behavior a clear home — color, rank, legality, and scoring are now all in one place and testable independently of the game loop.
+
+### What was preserved
+
+Card strings remain unchanged ("R5", "GS", "W4" etc.). The deck, hands, and discard still hold strings — this is an intentional incremental step. A future refactor could introduce Card instances if needed.
+
+### Result
+
+`Main` no longer contains any card-parsing logic. `Card` is fully testable in isolation. Adding a new card type now means one change in one class.
