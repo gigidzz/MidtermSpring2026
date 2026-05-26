@@ -124,7 +124,7 @@ public class Main {
             if (player.human) {
                 chosen = askHuman(hand);
             } else {
-                chosen = chooseBotCard(hand);
+                chosen = BotStrategy.chooseCard(hand, upCard, calledColor);
             }
 
             if (chosen == -1) {
@@ -171,7 +171,7 @@ public class Main {
                     if (player.human) {
                         calledColor = askColor();
                     } else {
-                        calledColor = chooseBotColor(hand);
+                        calledColor = BotStrategy.chooseColor(hand);
                     }
                     Display.playerCallsColor(name, calledColor);
                 }
@@ -217,24 +217,6 @@ public class Main {
         return deck.remove(0);
     }
 
-    static int chooseBotCard(ArrayList<String> hand) {
-        for (int i = 0; i < hand.size(); i++) {
-            String card = hand.get(i);
-            if (Card.rank(card).equals("DRAW_TWO") && Card.isLegal(card, upCard, calledColor)) return i;
-        }
-        for (int i = 0; i < hand.size(); i++) {
-            String card = hand.get(i);
-            if (Card.rank(card).equals("SKIP") && Card.isLegal(card, upCard, calledColor)) return i;
-        }
-        for (int i = 0; i < hand.size(); i++) {
-            String card = hand.get(i);
-            if (Card.rank(card).equals("NUMBER") && Card.isLegal(card, upCard, calledColor)) return i;
-        }
-        for (int i = 0; i < hand.size(); i++) {
-            if (Card.isWild(hand.get(i))) return i;
-        }
-        return -1;
-    }
 
     static int askHuman(ArrayList<String> hand) {
         while (true) {
@@ -268,20 +250,6 @@ public class Main {
         }
     }
 
-    static String chooseBotColor(ArrayList<String> hand) {
-        int r = 0, y = 0, g = 0, b = 0;
-        for (String card : hand) {
-            String c = Card.color(card);
-            if (c.equals("R")) r++;
-            else if (c.equals("Y")) y++;
-            else if (c.equals("G")) g++;
-            else if (c.equals("B")) b++;
-        }
-        if (r >= y && r >= g && r >= b) return "R";
-        else if (y >= r && y >= g && y >= b) return "Y";
-        else if (g >= r && g >= y && g >= b) return "G";
-        else return "B";
-    }
 
     static void applyEffect(String card) {
         if (Card.rank(card).equals("SKIP")) {
@@ -344,13 +312,13 @@ public class Main {
         h.add("W");
         upCard = "R9";
         calledColor = "";
-        if (chooseBotCard(h) == 1) passed++; else fail("bot normal before wild");
+        if (BotStrategy.chooseCard(h, upCard, calledColor) == 1) passed++; else fail("bot normal before wild");
 
         ArrayList<String> h2 = new ArrayList<String>();
         h2.add("B1");
         h2.add("B2");
         h2.add("R3");
-        if (chooseBotColor(h2).equals("B")) passed++; else fail("bot color");
+        if (BotStrategy.chooseColor(h2).equals("B")) passed++; else fail("bot color");
 
         Display.selfTestResult(passed);
     }

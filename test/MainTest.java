@@ -264,43 +264,35 @@ public class MainTest {
 
     @Test
     void botPrefersDrawTwoOverSkip() {
-        Main.upCard = "R5";
-        Main.calledColor = "";
         ArrayList<String> hand = new ArrayList<>();
         hand.add("RS");   // skip — legal
         hand.add("R+2");  // draw two — legal, should be preferred
         hand.add("W");
-        assertEquals(1, Main.chooseBotCard(hand));
+        assertEquals(1, BotStrategy.chooseCard(hand, "R5", ""));
     }
 
     @Test
     void botPrefersSkipOverNumber() {
-        Main.upCard = "R5";
-        Main.calledColor = "";
         ArrayList<String> hand = new ArrayList<>();
         hand.add("R3");   // number — legal
         hand.add("RS");   // skip — legal, should be preferred
-        assertEquals(1, Main.chooseBotCard(hand));
+        assertEquals(1, BotStrategy.chooseCard(hand, "R5", ""));
     }
 
     @Test
     void botPrefersNumberOverWild() {
-        Main.upCard = "R5";
-        Main.calledColor = "";
         ArrayList<String> hand = new ArrayList<>();
         hand.add("W");    // wild — always legal
         hand.add("R3");   // number — legal, should be preferred
-        assertEquals(1, Main.chooseBotCard(hand));
+        assertEquals(1, BotStrategy.chooseCard(hand, "R5", ""));
     }
 
     @Test
     void botReturnsMinusOneWhenNoLegalCard() {
-        Main.upCard = "R5";
-        Main.calledColor = "";
         ArrayList<String> hand = new ArrayList<>();
         hand.add("B3");
         hand.add("GS");
-        assertEquals(-1, Main.chooseBotCard(hand));
+        assertEquals(-1, BotStrategy.chooseCard(hand, "R5", ""));
     }
 
     // ── bot color choice ─────────────────────────────────────────────────────
@@ -311,7 +303,7 @@ public class MainTest {
         hand.add("B1");
         hand.add("B2");
         hand.add("R3");
-        assertEquals("B", Main.chooseBotColor(hand));
+        assertEquals("B", BotStrategy.chooseColor(hand));
     }
 
     @Test
@@ -321,7 +313,7 @@ public class MainTest {
         ArrayList<String> hand = new ArrayList<>();
         hand.add("W");
         hand.add("W4");
-        assertEquals("R", Main.chooseBotColor(hand));
+        assertEquals("R", BotStrategy.chooseColor(hand));
     }
 
     // ── quirk: penalty card on invalid index ─────────────────────────────────

@@ -107,3 +107,17 @@ Card strings remain unchanged ("R5", "GS", "W4" etc.). The deck, hands, and disc
 ### Result
 
 `Main` no longer contains any card-parsing logic. `Card` is fully testable in isolation. Adding a new card type now means one change in one class.
+
+## Step 7: Extract Bot Logic into BotStrategy Class
+
+### What changed
+
+A new `BotStrategy` class was created with two static methods: `chooseCard()` and `chooseColor()`. Both were moved out of `Main` and now take all their inputs as parameters — no global state access. `Main` calls `BotStrategy.chooseCard(hand, upCard, calledColor)` and `BotStrategy.chooseColor(hand)`. Tests were updated to call `BotStrategy` directly.
+
+### Why this step
+
+Bot decision logic was tangled inside `Main` alongside game rules and state management. By extracting it, bot behavior becomes independently testable and replaceable. A smarter bot strategy can now be implemented by changing only `BotStrategy` — nothing else needs to touch it. This also makes `Main` significantly smaller.
+
+### Result
+
+Bot decisions are fully separated from game rules. `BotStrategy` has no dependency on global state — it works purely on what it's given. Swapping in a different strategy requires no changes to `Main` or `Card`.
