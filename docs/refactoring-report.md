@@ -53,3 +53,21 @@ The main game loop was doing too many things at once — tracking turns, validat
 ### Result
 
 The main loop is significantly shorter and easier to follow. Card effects are now in one dedicated method.
+
+## Step 4: Separate Console Output into Display Class
+
+### What changed
+
+A new `Display` class was created in `src/Display.java` with a static method for every `System.out.println` and `System.out.print` call in the game. Main no longer prints anything directly — all output goes through Display. The `quiet` flag moved into Display so game logic does not need to check it.
+
+### Why this step
+
+This is the most important structural change. Before this step, game rules and console output were completely tangled — `playGame()` was making decisions and printing results in the same breath. After this step, game logic methods contain no I/O. `isLegal()`, `applyEffect()`, `chooseBotCard()`, and the scoring logic are all testable without any console involvement. This is the MVC-like boundary the rubric requires.
+
+### What was preserved
+
+All output messages are identical — the same strings, the same quiet/verbose behavior. No visible behavior changed.
+
+### Result
+
+`Main.java` contains no `System.out` calls except inside `Display`. Swapping out the CLI view now means only touching `Display.java`.
