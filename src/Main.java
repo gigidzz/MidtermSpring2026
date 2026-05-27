@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
-import java.util.Scanner;
 
 public class Main {
     static ArrayList<Player> players = new ArrayList<Player>();
@@ -14,7 +13,6 @@ public class Main {
     static String calledColor = "";
     static boolean quiet = false;
     static Random random = new Random();
-    static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         int bots = 3;
@@ -72,26 +70,7 @@ public class Main {
     }
 
     static void playGame() {
-        deck.clear();
-        String[] colors = {"R", "Y", "G", "B"};
-        for (int c = 0; c < colors.length; c++) {
-            deck.add(colors[c] + "0");
-            for (int n = 1; n <= 9; n++) {
-                deck.add(colors[c] + n);
-                deck.add(colors[c] + n);
-            }
-            deck.add(colors[c] + "S");
-            deck.add(colors[c] + "S");
-            deck.add(colors[c] + "R");
-            deck.add(colors[c] + "R");
-            deck.add(colors[c] + "+2");
-            deck.add(colors[c] + "+2");
-        }
-        for (int i = 0; i < 4; i++) {
-            deck.add("W");
-            deck.add("W4");
-        }
-        Collections.shuffle(deck, random);
+        buildDeck();
         discard.clear();
         for (Player p : players) {
             p.hand.clear();
@@ -122,7 +101,7 @@ public class Main {
 
             int chosen = -1;
             if (player.human) {
-                chosen = askHuman(hand);
+                chosen = Display.askHuman(hand, upCard, calledColor);
             } else {
                 chosen = BotStrategy.chooseCard(hand, upCard, calledColor);
             }
@@ -135,9 +114,7 @@ public class Main {
                     if (!player.human) {
                         chosen = hand.size() - 1;
                     } else {
-                        Display.promptPlayDrawnCard(drawn);
-                        String answer = scanner.nextLine();
-                        if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")) {
+                        if (Display.askPlayDrawnCard(drawn)) {
                             chosen = hand.size() - 1;
                         }
                     }
@@ -169,7 +146,7 @@ public class Main {
 
                 if (Card.isWild(card)) {
                     if (player.human) {
-                        calledColor = askColor();
+                        calledColor = Display.askColor();
                     } else {
                         calledColor = BotStrategy.chooseColor(hand);
                     }
@@ -207,6 +184,29 @@ public class Main {
         return points;
     }
 
+    static void buildDeck() {
+        deck.clear();
+        String[] colors = {"R", "Y", "G", "B"};
+        for (int c = 0; c < colors.length; c++) {
+            deck.add(colors[c] + "0");
+            for (int n = 1; n <= 9; n++) {
+                deck.add(colors[c] + n);
+                deck.add(colors[c] + n);
+            }
+            deck.add(colors[c] + "S");
+            deck.add(colors[c] + "S");
+            deck.add(colors[c] + "R");
+            deck.add(colors[c] + "R");
+            deck.add(colors[c] + "+2");
+            deck.add(colors[c] + "+2");
+        }
+        for (int i = 0; i < 4; i++) {
+            deck.add("W");
+            deck.add("W4");
+        }
+        Collections.shuffle(deck, random);
+    }
+
     static String draw() {
         if (deck.size() == 0) {
             deck.addAll(discard);
@@ -218,37 +218,6 @@ public class Main {
     }
 
 
-    static int askHuman(ArrayList<String> hand) {
-        while (true) {
-            Display.promptChooseCard();
-            String input = scanner.nextLine().trim().toUpperCase();
-            if (input.equals("DRAW")) return -1;
-            try {
-                int index = Integer.parseInt(input);
-                if (index >= 0 && index < hand.size()) return index;
-            } catch (Exception ignored) {
-            }
-            for (int i = 0; i < hand.size(); i++) {
-                if (hand.get(i).equals(input)) {
-                    if (Card.isLegal(hand.get(i), upCard, calledColor)) return i;
-                    Display.cardNotLegal();
-                }
-            }
-            Display.cardNotFound();
-        }
-    }
-
-    static String askColor() {
-        while (true) {
-            Display.promptColor();
-            String input = scanner.nextLine().trim().toUpperCase();
-            if (input.equals("R")) return "R";
-            if (input.equals("Y")) return "Y";
-            if (input.equals("G")) return "G";
-            if (input.equals("B")) return "B";
-            Display.badColor();
-        }
-    }
 
 
     static void applyEffect(String card) {

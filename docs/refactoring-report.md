@@ -121,3 +121,21 @@ Bot decision logic was tangled inside `Main` alongside game rules and state mana
 ### Result
 
 Bot decisions are fully separated from game rules. `BotStrategy` has no dependency on global state — it works purely on what it's given. Swapping in a different strategy requires no changes to `Main` or `Card`.
+
+## Step 8: Extract buildDeck() and Move Input Methods into Display
+
+### What changed
+
+The 20-line deck construction block inside `playGame()` was extracted into its own `buildDeck()` method. `playGame()` now starts with a single call.
+
+`askHuman()`, `askColor()`, and the draw-confirmation prompt were moved out of `Main` and into `Display`. The `Scanner` moved with them — it now lives privately in `Display`. `Display.askHuman()` takes `upCard` and `calledColor` as parameters so it can validate card legality without touching global state directly. `Main` no longer contains any console reading code.
+
+### Why this step
+
+`playGame()` was still doing two things at the start: building the deck and running the game. Extracting `buildDeck()` gives that responsibility a clear name and makes `playGame()` easier to read.
+
+Moving input to `Display` completes the I/O separation. `Main` now contains no `Scanner` usage, no `System.out` calls, and no console reading. All terminal interaction — output and input — is in `Display`.
+
+### Result
+
+`Main` is now purely game orchestration. The separation between game logic and console I/O is complete.

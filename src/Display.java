@@ -1,7 +1,9 @@
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Display {
     static boolean quiet = false;
+    private static final Scanner scanner = new Scanner(System.in);
 
     static void gameHeader(int gameNumber) {
         if (!quiet) System.out.println("\n=== Game " + gameNumber + " ===");
@@ -100,6 +102,45 @@ public class Display {
 
     static void badColor() {
         System.out.println("Bad color.");
+    }
+
+    // input methods — all console reading lives here
+    static int askHuman(ArrayList<String> hand, String upCard, String calledColor) {
+        while (true) {
+            promptChooseCard();
+            String input = scanner.nextLine().trim().toUpperCase();
+            if (input.equals("DRAW")) return -1;
+            try {
+                int index = Integer.parseInt(input);
+                if (index >= 0 && index < hand.size()) return index;
+            } catch (Exception ignored) {
+            }
+            for (int i = 0; i < hand.size(); i++) {
+                if (hand.get(i).equals(input)) {
+                    if (Card.isLegal(hand.get(i), upCard, calledColor)) return i;
+                    cardNotLegal();
+                }
+            }
+            cardNotFound();
+        }
+    }
+
+    static String askColor() {
+        while (true) {
+            promptColor();
+            String input = scanner.nextLine().trim().toUpperCase();
+            if (input.equals("R")) return "R";
+            if (input.equals("Y")) return "Y";
+            if (input.equals("G")) return "G";
+            if (input.equals("B")) return "B";
+            badColor();
+        }
+    }
+
+    static boolean askPlayDrawnCard(String card) {
+        promptPlayDrawnCard(card);
+        String answer = scanner.nextLine();
+        return answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes");
     }
 
     private static String join(ArrayList<String> cards) {
