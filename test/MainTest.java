@@ -9,14 +9,7 @@ public class MainTest {
 
     @BeforeEach
     void reset() {
-        Main.upCard = "";
-        Main.calledColor = "";
-        Main.direction = 1;
-        Main.currentPlayer = 0;
-        Main.deck = new ArrayList<>();
-        Main.discard = new ArrayList<>();
-        Main.players = new ArrayList<>();
-        Main.scores = new int[10];
+        Main.state = new GameState();
         Display.quiet = true;
     }
 
@@ -180,18 +173,18 @@ public class MainTest {
     @Test
     void scoringAddsOpponentHandValues() {
         Main.setupPlayers(2, false);
-        Main.upCard = "R5";
-        Main.calledColor = "";
+        Main.state.upCard = "R5";
+        Main.state.calledColor = "";
 
-        Main.players.get(0).hand.clear();  // winner — empty hand
-        Main.players.get(1).hand.clear();
-        Main.players.get(1).hand.add("W");   // 50 points
-        Main.players.get(1).hand.add("R5");  // 5 points
+        Main.state.players.get(0).hand.clear();  // winner — empty hand
+        Main.state.players.get(1).hand.clear();
+        Main.state.players.get(1).hand.add("W");   // 50 points
+        Main.state.players.get(1).hand.add("R5");  // 5 points
 
         int expected = 55;
         int actual = 0;
-        for (int i = 1; i < Main.players.size(); i++) {
-            for (String card : Main.players.get(i).hand) {
+        for (int i = 1; i < Main.state.players.size(); i++) {
+            for (String card : Main.state.players.get(i).hand) {
                 actual += Card.points(card);
             }
         }
@@ -202,24 +195,24 @@ public class MainTest {
 
     @Test
     void drawReturnsTopOfDeck() {
-        Main.deck.add("R5");
-        Main.deck.add("G3");
-        assertEquals("R5", Main.draw());
-        assertEquals("G3", Main.draw());
+        Main.state.deck.add("R5");
+        Main.state.deck.add("G3");
+        assertEquals("R5", Main.state.draw());
+        assertEquals("G3", Main.state.draw());
     }
 
     @Test
     void drawreshufflesDiscardWhenDeckEmpty() {
-        Main.discard.add("B2");
-        Main.discard.add("YS");
-        String drawn = Main.draw();
+        Main.state.discard.add("B2");
+        Main.state.discard.add("YS");
+        String drawn = Main.state.draw();
         assertTrue(drawn.equals("B2") || drawn.equals("YS"));
-        assertEquals(1, Main.deck.size() + Main.discard.size());
+        assertEquals(1, Main.state.deck.size() + Main.state.discard.size());
     }
 
     @Test
     void drawReturnsWildWhenBothDeckAndDiscardEmpty() {
-        assertEquals("W", Main.draw());
+        assertEquals("W", Main.state.draw());
     }
 
     // ── skip behavior ────────────────────────────────────────────────────────
@@ -227,37 +220,37 @@ public class MainTest {
     @Test
     void nextAdvancesCurrentPlayer() {
         Main.setupPlayers(2, false);
-        Main.currentPlayer = 0;
-        Main.direction = 1;
-        Main.next();
-        assertEquals(1, Main.currentPlayer);
+        Main.state.currentPlayer = 0;
+        Main.state.direction = 1;
+        Main.state.next();
+        assertEquals(1, Main.state.currentPlayer);
     }
 
     @Test
     void nextWrapsAround() {
         Main.setupPlayers(2, false);
-        Main.currentPlayer = 1;
-        Main.direction = 1;
-        Main.next();
-        assertEquals(0, Main.currentPlayer);
+        Main.state.currentPlayer = 1;
+        Main.state.direction = 1;
+        Main.state.next();
+        assertEquals(0, Main.state.currentPlayer);
     }
 
     // ── reverse behavior ─────────────────────────────────────────────────────
 
     @Test
     void reverseFlipsDirection() {
-        Main.direction = 1;
-        Main.direction = Main.direction * -1;
-        assertEquals(-1, Main.direction);
+        Main.state.direction = 1;
+        Main.state.direction = Main.state.direction * -1;
+        assertEquals(-1, Main.state.direction);
     }
 
     @Test
     void nextGoesBackwardWhenDirectionReversed() {
         Main.setupPlayers(3, false);
-        Main.currentPlayer = 0;
-        Main.direction = -1;
-        Main.next();
-        assertEquals(2, Main.currentPlayer);
+        Main.state.currentPlayer = 0;
+        Main.state.direction = -1;
+        Main.state.next();
+        assertEquals(2, Main.state.currentPlayer);
     }
 
     // ── bot card selection ────────────────────────────────────────────────────

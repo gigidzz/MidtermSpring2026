@@ -21,10 +21,15 @@ Writing tests before any refactoring was the first priority. Without them, there
 - **Bot color defaults to R when hand has no colored cards.** All color counts are 0, and the first condition `r >= y && r >= g && r >= b` evaluates true, so R wins by tie-break order. This is the current behavior, not a bug fix.
 - **Invalid index input gives a penalty card and skips the turn.** The main loop checks `chosen >= hand.size()` and draws a penalty card without playing anything.
 
-### Worst design problems found so far
+### Worst design problems found
 
-- The legal-play check is written out three times: once in `isLegal()`, once in `chooseBotCard()`, and once inline in the main turn loop. `isLegal()` exists but is not used everywhere.
-- The entire game — state, rules, console I/O, bot logic, scoring — lives in one 535-line class with global static fields.
+- **Duplicated legality logic.** The legal-play check was written out three times: once in `isLegal()`, once inline in `chooseBotCard()`, and once in the main turn loop. `isLegal()` existed but was not called everywhere.
+- **Monolithic class.** State, card rules, console I/O, bot decisions, scoring, and turn orchestration all lived in one class with global static fields. Nothing could be tested in isolation.
+- **Parallel player lists.** Player name, human flag, and hand were stored in three separate `ArrayList`s indexed in lockstep — easy to get out of sync, hard to follow.
+- **Bot logic mixed with game logic.** `chooseBotCard()` and `chooseBotColor()` lived inside `Main` alongside rule enforcement, making bot behavior impossible to test or replace independently.
+- **Console I/O mixed with rule execution.** `playGame()` called `System.out.println` in the middle of card-effect logic, making it impossible to test rule behavior without producing console output.
+- **Scoring mixed with game completion.** The win check, point calculation, and display of results happened in the same `if` block with no separation.
+- **Hidden randomness.** The `Random` instance was created inside `playGame()` with no way to seed it from outside, making tests non-deterministic.
 
 ## Step 2: Eliminate Duplicated Legal-Play Logic in chooseBotCard()
 
@@ -139,3 +144,6 @@ Moving input to `Display` completes the I/O separation. `Main` now contains no `
 ### Result
 
 `Main` is now purely game orchestration. The separation between game logic and console I/O is complete.
+
+## Step 8: Extract GameState
+
